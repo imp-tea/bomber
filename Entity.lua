@@ -6,21 +6,18 @@ Entities = {}
 
 function Entity:initialize(world, x, y, properties)
     self.world = world
-    local gx,gy = self.world:getGravity()
+    self.gx,self.gy = self.world:getGravity()
     if properties == nil then properties = {} end
     self.x,self.y = x,y
     self.hasGravity = properties.hasGravity or true
     self.friction = properties.friction or 0.2
-    self.shape = properties.shape or "pill"
-    self.headSize = properties.headSize or 1
+    self.shape = properties.shape or "circle"
     self.radius = properties.radius or 5
     self.height = properties.height or 40
     self.width = properties.width or 20
     self.density = properties.density or 1
+    self.headSize = properties.headSize or 1
     self.color = properties.color or {1,1,1,1}
-    self.jumpSpeed = properties.jumpSpeed or math.sqrt(2.5*self.height*gy)
-    self.bobble = properties.bobble or false
-    self.ungroundedMultiplier = properties.ungroundedMultiplier or 1
     self.restitution = properties.restitution or 0
     self.category = properties.category or 1
     self.mask = properties.mask or 1
@@ -32,14 +29,10 @@ function Entity:initialize(world, x, y, properties)
     self.body:setAngularDamping(properties.angularDamping or 0)
     self:attachShape()
     self.body:setLinearVelocity((properties.vx or 0),(properties.vy or 0))
-    self.body:setUserData(properties.userData or {jumpable=true, carryable = true})
-    self.canJump = false
-    self.moveForce = properties.moveForce or self.body:getMass()*1000
+    self.body:setUserData(self)
     self.mass = self.body:getMass()
-
     self.id = id or "Entity"..tostring(x)..tostring(y)..tostring(self.shape)..tostring(math.random(1,1000))
     Entities[self.id] = self
-
 end
 
 function Entity:attachShape()
@@ -161,59 +154,5 @@ function Entity:isGrounded()
 end
 
 function Entity:update()
-    local vx, vy = self.body:getLinearVelocity()
     self.x,self.y = self.body:getPosition()
-    --self.body:setAngularVelocity(self.body:getAngularVelocity() * self.angularDamping)
-
-    if self.bobble then
-        local bob = false
-        local contacts = self.body:getContacts()
-        for key,contact in pairs(contacts) do
-            if contact:isTouching() then
-                bob = true
-                break
-            end
-        end
-        if bob then
-            local head = self.fixtures["head"]:getShape()
-            local hx,hy = self.body:getWorldPoint(head:getPoint())
-            local tail = self.fixtures["foot"]:getShape()
-            local tx,ty = self.body:getWorldPoint(tail:getPoint())
-            self.body:applyForce(0,self.mass*-1000,hx,hy)
-            self.body:applyForce(0,self.mass*1000,tx,ty)
-        end
-    end
-    --self.grounded = self:isGrounded()
-end
-
-function Entity:move(direction)
-    local fx = 0
-    local fy = 0
-    local cmx,cmy = self.body:getWorldCenter()
-    local directionTable = {
-        ["U"] = {0,-1},
-        ["D"] = {0,1},
-        ["L"]= {-1,0},
-        ["R"] = {1,0},
-        ["UL"] = {-0.7071,-0.7071},
-        ["UR"] = {0.7071,-0.7071},
-        ["DL"] = {-0.7071,0.7071},
-        ["DR"] = {0.7071,0.7071}
-    }
-    --
-    if type(direction) == "string" then
-        fx = self.moveForce*directionTable[direction][1]
-        fy = self.moveForce*directionTable[direction][2]
-    else
-        fx = self.moveForce*direction[1]
-        fy = self.moveForce*direction[2]
-    end
-    if self:isGrounded() == false then
-        fx = fx*self.ungroundedMultiplier
-        fy = fy*self.ungroundedMultiplier
-        self.body:applyForce(fx,fy,cmx,cmy)
-        self.body:applyTorque(fx*10)
-    else
-        self.body:applyForce(fx,fy,cmx,cmy+3)
-    end
 end
