@@ -85,7 +85,7 @@ function Entity:attachShape()
         self.fixtures[k]:setFilterData(self.category, self.mask, self.group)
         self.fixtures[k]:setFriction(self.friction)
         self.fixtures[k]:setRestitution(self.restitution)
-        self.fixtures[k]:setUserData(self.userData)
+        self.fixtures[k]:setUserData(self)
     end
 end
 
@@ -121,13 +121,6 @@ function Entity:draw()
     local cmx,cmy = self.body:getWorldCenter()
     love.graphics.setColor(1,1,1,1)
     love.graphics.circle("fill",cmx,cmy,3)
-end
-
-function Entity:jump(override)
-    if override == true or self:isGrounded() then
-        local vx,vy = self.body:getLinearVelocity()
-        self.body:setLinearVelocity(vx, self.jumpSpeed*-1)
-    end
 end
 
 function Entity:isGrounded()

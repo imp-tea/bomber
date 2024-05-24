@@ -4,6 +4,7 @@ require 'Obstacle'
 require 'Entity'
 require 'Camera'
 require 'Player'
+require 'Bomb'
 require 'util'
 
 math.randomseed(os.time())
@@ -68,7 +69,9 @@ function love.update(dt)
     for k,obstacle in pairs(Obstacles) do
         obstacle:update()
     end
-
+    for k, bomb in pairs(Bombs) do
+        bomb:update(dt)
+    end
     camera:update()
     World:update(dt)
 
@@ -86,6 +89,9 @@ function love.draw()
     for k,terrain in pairs(Terrains) do
         terrain:draw()
     end
+    for k, bomb in pairs(Bombs) do
+        bomb:draw()
+    end
     camera:unset()
 
     --love.graphics.print("X: "..math.floor(love.mouse.getX()).."  Y= "..math.floor(love.mouse.getY()), 50, 50)
@@ -99,6 +105,7 @@ end
 function love.mousepressed(x, y, button, isTouch)
     x=x+camera.x
     y=y+camera.y
+    local bomb = Bomb(World, x, y, {vx = math.random(50, 1000), radius = math.random(3, 10)})
 end
 
 function love.mousereleased(x, y, button, isTouch)
