@@ -20,6 +20,8 @@ function Bomb:initialize(world, x, y, properties)
     self.mask = properties.mask or 1
     self.group = properties.group or 0
     self.body = love.physics.newBody(world, x, y, "dynamic")
+    self.stickTo = properties.stickTo or {}
+    self.explodeOn = properties.explodeOn or {}
     self.body:setFixedRotation(properties.fixedRotation or false)
     self.body:setLinearDamping(properties.linearDamping or 0)
     self.body:setAngularDamping(properties.angularDamping or 1.5)
@@ -82,6 +84,34 @@ end
 function Bomb:update(dt)
     self.x,self.y = self.body:getPosition()
     self.life = self.life - dt
+    if #self.stickTo > 0 or #self.explodeOn > 0 then
+        local contacts = self.body:getContacts()
+        for i,contact in pairs(contacts) do
+            if contact:isTouching() then
+                local fixtureA, fixtureB = contact:getFixtures()
+                local other = fixtureA
+                if fixtureA:getUserData() == self then other = fixtureB end
+                if #self.stickTo > 0 then
+                    if self.stickTo[1]=="All" then
+                        local otherBody = other:getBody()
+                        local contactPoint = contact.getPositions()
+                        local joint = love.phyiscs.newWeldJoint(self.body, otherBody, contactPoint[1], contactPoint[2], false)
+                    else
+                        for j,object in pairs(self.stickTo) do
+                            if string.find(other:getUserData().id, object) then
+                                local otherBody = other:getBody()
+                                local contactPoint = contact.getPositions()
+                                local joint = love.phyiscs.newWeldJoint(self.body, otherBody, contactPoint[1], contactPoint[2], false)
+                            end
+                        end
+                    end
+                end
+                if #self.explodeOn > 0 then
+
+                end
+            end
+        end
+    end
     if self.life <= 0 then
         local explosion = Explosion(self.world, self.x, self.y, {radius = self.radius*self.radius*2+25})
         self:kill()
