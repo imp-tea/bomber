@@ -29,7 +29,7 @@ function love.load()
     trampolineL = Terrain:new(World,WIDTH-80,HEIGHT-180,{restitution = 2, type = 'polygon', points = {80,-80,80,80,-80,80}, color = util.randomColor(theme)})
 
     player = Player:new(World,WIDTH/2,HEIGHT/3,{group = 1, fixedRotation = true, ungroundedMultiplier = 0.2, height = 50, width = 25, color = util.randomColor(theme), shape='pill'})
-    cannon = Cannon:new(World, WIDTH/3, 200)
+    cannon = Cannon:new(World, WIDTH/3, 200, {color = util.randomColor(theme), target = player})
 
     platform = Obstacle:new(World, WIDTH/2+100, HEIGHT-150, {
         width = 150,
