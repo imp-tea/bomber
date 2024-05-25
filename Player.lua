@@ -5,7 +5,7 @@ Player = class('Player', Entity)
 
 function Player:initialize(world, x, y, properties)
     if properties == nil then properties = {} end
-    Entity.initialize(self, world, x, y, properties)
+    Entity.initialize(self, world, x, y, properties, false)
     self.jumpSpeed = properties.jumpSpeed or math.sqrt(3*self.height*self.gy)
     self.ungroundedMultiplier = properties.ungroundedMultiplier or 1
     self.canJump = false
@@ -18,6 +18,9 @@ function Player:initialize(world, x, y, properties)
     self.facing = 1
     self.charging = false
     self.charge = self.minimumCharge
+    self.id = id or "Player"..tostring(x)..tostring(y)..tostring(self.shape)..tostring(math.random(1,1000))
+    Updateables[self.id] = self
+    Drawables[self.id] = self
 end
 
 function Player:jump(override)

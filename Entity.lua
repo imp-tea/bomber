@@ -4,7 +4,7 @@ require 'util'
 
 Entities = {}
 
-function Entity:initialize(world, x, y, properties)
+function Entity:initialize(world, x, y, properties, setId)
     self.world = world
     self.gx,self.gy = self.world:getGravity()
     if properties == nil then properties = {} end
@@ -33,10 +33,13 @@ function Entity:initialize(world, x, y, properties)
     self.body:setLinearVelocity(self.vx, self.vy)
     self.body:setUserData(self)
     self.mass = self.body:getMass()
-    self.id = id or "Entity"..tostring(x)..tostring(y)..tostring(self.shape)..tostring(math.random(1,1000))
-    Entities[self.id] = self
-    Updateables[self.id] = self
-    Drawables[self.id] = self
+    local newId = setId or true
+    if newId then
+        self.id = id or "Entity"..tostring(x)..tostring(y)..tostring(self.shape)..tostring(math.random(1,1000))
+        Entities[self.id] = self
+        Updateables[self.id] = self
+        Drawables[self.id] = self
+    end
 end
 
 function Entity:attachShape()

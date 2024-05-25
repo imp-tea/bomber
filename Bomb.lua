@@ -94,14 +94,14 @@ function Bomb:update(dt)
                 if #self.stickTo > 0 then
                     if self.stickTo[1]=="All" then
                         local otherBody = other:getBody()
-                        local contactPoint = contact.getPositions()
-                        local joint = love.phyiscs.newWeldJoint(self.body, otherBody, contactPoint[1], contactPoint[2], false)
+                        local cx1, cy1, cx2, cy2 = contact:getPositions()
+                        local joint = love.physics.newWeldJoint(self.body, otherBody, cx1, cy1, false)
                     else
                         for j,object in pairs(self.stickTo) do
                             if string.find(other:getUserData().id, object) then
                                 local otherBody = other:getBody()
-                                local contactPoint = contact.getPositions()
-                                local joint = love.phyiscs.newWeldJoint(self.body, otherBody, contactPoint[1], contactPoint[2], false)
+                                local cx1, cy1, cx2, cy2 = contact:getPositions()
+                                local joint = love.physics.newWeldJoint(self.body, otherBody, cx1, cy1, false)
                             end
                         end
                     end
