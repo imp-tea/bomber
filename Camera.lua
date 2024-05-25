@@ -13,9 +13,6 @@ end
 
 function Camera:update()
     self.scale = self.scale + (self.targetScale-self.scale)/20
-    -- Recalculate camera's position based on new scale
-    --self.x = self.target.x - ((love.graphics.getWidth()/2)*self.scale)
-    --self.y = self.target.y - ((love.graphics.getHeight()/2)*self.scale)
     local tarx = self.target.x - ((love.graphics.getWidth()/2)*self.targetScale)
     local tary = self.target.y - ((love.graphics.getHeight()/2)*self.targetScale)
     self:move((tarx-self.x)/20, (tary-self.y)/20)
