@@ -19,10 +19,9 @@ function Obstacle:initialize(world, x, y, properties)
     self.group = properties.group or 0
 	self.restitution = properties.restitution or 0
 	self.rotation = properties.rotation or 0
-    self.userData = properties.userData or {jumpable = true}
 	self.spin = properties.spin or 0
 	self.points = properties.points or nil
-
+	self.jumpable = properties.jumpable or true
 
     self.body = love.physics.newBody(world, x, y, "kinematic")
     if self.type == "rectangle" then
@@ -34,11 +33,11 @@ function Obstacle:initialize(world, x, y, properties)
 	if self.type == 'polygon' then
 		self.shape = love.physics.newPolygonShape(self.points)
 	end
-	self.body:setUserData(self.userData)
+	self.body:setUserData(self)
     self.fixture = love.physics.newFixture (self.body, self.shape, self.density)
     self.fixture:setFilterData(self.category, self.mask, self.group)
     self.fixture:setFriction(self.friction)
-    self.fixture:setUserData(self.userData)
+    self.fixture:setUserData(self)
 	self.fixture:setRestitution(self.restitution)
 	if self.spin ~= nil then self.body:setAngularVelocity(self.spin) end
 

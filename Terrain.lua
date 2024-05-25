@@ -19,11 +19,10 @@ function Terrain:initialize(world, x, y, properties)
     self.group = properties.group or 0
 	self.restitution = properties.restitution or 0
 	self.rotation = properties.rotation or 0
-    self.userData = properties.userData or {jumpable = true}
 	self.points = properties.points or nil
-
+    self.jumpable = properties.jumpable or true
     self.body = love.physics.newBody(world, x, y, "static")
-	self.body:setUserData(self.userData)
+	self.body:setUserData(self)
     if self.type == "rectangle" then
     	self.shape = love.physics.newRectangleShape(0,0, self.width, self.height, self.rotation)
     end
@@ -36,7 +35,7 @@ function Terrain:initialize(world, x, y, properties)
     self.fixture = love.physics.newFixture (self.body, self.shape, self.density)
     self.fixture:setFilterData(self.category, self.mask, self.group)
     self.fixture:setFriction(self.friction)
-    self.fixture:setUserData(self.userData)
+    self.fixture:setUserData(self)
 	self.fixture:setRestitution(self.restitution)
 
 	self.id = id or "Terrain"..tostring(x)..tostring(y)..tostring(self.type)..tostring(math.random(1,1000))
