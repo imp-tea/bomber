@@ -6,6 +6,7 @@ Player = class('Player', Entity)
 function Player:initialize(world, x, y, properties)
     if properties == nil then properties = {} end
     Entity.initialize(self, world, x, y, properties, false)
+
     self.jumpSpeed = properties.jumpSpeed or math.sqrt(3*self.height*self.gy)
     self.ungroundedMultiplier = properties.ungroundedMultiplier or 1
     self.canJump = false
@@ -13,11 +14,22 @@ function Player:initialize(world, x, y, properties)
     self.grounded = false
     self.body:setUserData(self)
     self.moveForce = properties.moveForce or self.body:getMass()*2500
+
     self.minimumCharge = 3
     self.maximumCharge = 15
-    self.facing = 1
     self.charging = false
     self.charge = self.minimumCharge
+
+    self.facing = 1
+    self.animTimer = 0
+    self.anim = properties.anim or {
+        idle = {0.3, love.graphics.newImage('anim/idle1.png'),love.graphics.newImage('anim/idle2.png'), love.graphics.newImage('anim/idle1.png'),love.graphics.newImage('anim/idle2.png')},
+        run = {0.1, love.graphics.newImage('anim/run1.png'),love.graphics.newImage('anim/run2.png'),love.graphics.newImage('anim/run3.png'),love.graphics.newImage('anim/run4.png')},
+        jump = {1, love.graphics.newImage('anim/jump1.png'), love.graphics.newImage('anim/jump1.png'), love.graphics.newImage('anim/jump1.png'), love.graphics.newImage('anim/jump1.png')}
+    }
+    self.anim.loop = self.anim.idle  --idle, run, or jump
+	self.anim.frame = 2
+
     self.id = id or "Player"..tostring(x)..tostring(y)..tostring(self.shape)..tostring(math.random(1,1000))
     Updateables[self.id] = self
     Drawables[self.id] = self
@@ -47,8 +59,17 @@ function Player:update(dt)
         self.charge = self.charge + dt*5
         if self.charge > self.maximumCharge then self.charge = self.maximumCharge end
     end
-
     self.x,self.y = self.body:getPosition()
+    if self.grounded then
+        if math.abs(self.vx) < 100 then
+            self.anim.loop = self.anim.idle
+        else
+            self.anim.loop = self.anim.run
+        end
+    else
+        self.anim.loop = self.anim.jump
+    end
+    self:updateAnimation(dt)
 end
 
 function Player:move(direction)
@@ -87,4 +108,22 @@ function Player:shoot()
     local offsetY = -10
     local velocityX = self.facing * 1500 + self.body:getLinearVelocity()
     local bomb = Bomb:new(self.world, self.x + offsetX, self.y + offsetY, {radius = self.charge, vx = velocityX})
+end
+
+function Player:updateAnimation(dt)
+    self.animTimer = self.animTimer + dt
+    local n = table.getn(self.anim.loop) - 1
+    if self.animTimer > self.anim.loop[1] then
+        self.animTimer = 0
+        if self.anim.frame < n then
+            self.anim.frame = self.anim.frame + 1
+        else
+            self.anim.frame = 2
+        end
+    end
+end
+
+function Player:draw()
+    love.graphics.setColor(1,1,1)
+	love.graphics.draw(self.anim.loop[self.anim.frame], self.body:getX(), self.body:getY(), 0, self.facing*2, 2, 16, 16, 0, 0)
 end
