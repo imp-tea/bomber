@@ -16,10 +16,11 @@ function Cannon:initialize(world, x, y, properties)
     self.barrelWidth = properties.barrelWidth or self.barrelLength/4
     self.angle = properties.angle or 0
     self.target = properties.target or nil
-    self.rotationSpeed = properties.rotationSpeed or math.pi
-    self.bombPeriod = properties.bombPeriod or 1
+    self.rotationSpeed = properties.rotationSpeed or math.pi/4
+    self.bombPeriod = properties.bombPeriod or 3
     self.bombTimer = properties.bombTimer or 0
-    self.bombSize = properties.bombSize or 10
+    self.bombSize = properties.bombSize or 15
+    self.bombSpeed = properties.bombSpeed or 1000
     self.category = properties.category or 1
     self.mask = properties.mask or 1
     self.group = properties.group or 0
@@ -75,10 +76,46 @@ function Cannon:draw()
             love.graphics.polygon("fill", self.body:getWorldPoints(shape:getPoints()))
         end
     end
+    local endPoints = {self.x+math.cos(self.angle)*1000, self.y+math.sin(self.angle)*1000}
+    love.graphics.line(self.x, self.y, endPoints[1], endPoints[2])
+    love.graphics.setColor(1,0,0)
+    love.graphics.print(self.angle, endPoints[1], endPoints[2]+50)
 end
 
 function Cannon:update(dt)
+    self.bombTimer = self.bombTimer + dt
+    self.angle = self.body:getAngle()
+    self.x = self.body:getX()
+    self.y = self.body:getY()
+    local dx = math.cos(self.angle)
+    local dy = math.sin(self.angle)
+    local sx = self.x+dx*self.barrelLength
+    local sy = self.y+dy*self.barrelLength
+    local vx = self.bombSpeed*dx
+    local vy = self.bombSpeed*dy
+    local t = 0
+    if math.abs(vx) > 0 then t = (self.target.x - sx)/vx end
+    local correction = 0.5*self.gy*t*t
+    if t < 0 or math.abs(correction)>1000 then correction = 0 end
+    dy = (self.target.y-correction)-sy
+    dx = self.target.x - sx
+    local targetAngle = math.atan2(dy, dx)
+    self.body:setAngularVelocity(self.rotationSpeed * getDirection(targetAngle, self.angle))
+        
+    if self.bombTimer >= self.bombPeriod then
+        self.bombTimer = 0
+        self:shoot()
+    end
+end
 
+function Cannon:shoot()
+    local dx = math.cos(self.angle)
+    local dy = math.sin(self.angle)
+    local offsetX = (self.barrelLength+self.bombSize) * dx
+    local offsetY = (self.barrelLength+self.bombSize) * dy
+    local velocityX = self.bombSpeed * dx
+    local velocityY = self.bombSpeed * dy
+    local bomb = Bomb:new(self.world, self.x + offsetX, self.y + offsetY, {radius = self.bombSize, vx = velocityX, vy = velocityY})
 end
 
 function Cannon:kill()
@@ -87,4 +124,35 @@ function Cannon:kill()
     Updateables[self.id] = nil
     Drawables[self.id] = nil
     self = nil
+end
+
+-- Function to normalize an angle to the range [0, 2*pi)
+function normalize_angle(angle)
+    return angle - (2 * math.pi) * math.floor(angle / (2 * math.pi))
+end
+
+-- Function to determine if a2 is clockwise or counterclockwise from a1
+function getDirection(a1, a2)
+    -- Normalize the angles
+    a1 = normalize_angle(a1)
+    a2 = normalize_angle(a2)
+    
+    -- Calculate the difference
+    local diff = a2 - a1
+    
+    -- Normalize the difference to the range [-pi, pi)
+    if diff < -math.pi then
+        diff = diff + 2 * math.pi
+    elseif diff >= math.pi then
+        diff = diff - 2 * math.pi
+    end
+
+    -- Determine the direction
+    if diff > 0.01 then
+        return -1
+    elseif diff < -0.01 then
+        return 1
+    else
+        return 0
+    end
 end
