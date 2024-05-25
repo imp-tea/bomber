@@ -15,7 +15,7 @@ Drawables = {}
 function love.load()
     WIDTH, HEIGHT = love.window.getDesktopDimensions(1)
     HEIGHT = HEIGHT - 100
-    WIDTH = WIDTH - 100
+    WIDTH = HEIGHT
     World = love.physics.newWorld(0,1500,true)
     window = love.window.setMode(WIDTH,HEIGHT,{msaa = 2})
     love.graphics.setBackgroundColor(util.randomColor({dark=true}))
