@@ -21,7 +21,7 @@ function Bomb:initialize(world, x, y, properties)
     self.group = properties.group or 0
     self.body = love.physics.newBody(world, x, y, "dynamic")
     self.body:setFixedRotation(properties.fixedRotation or false)
-    self.body:setLinearDamping(properties.linearDamping or 0.05)
+    self.body:setLinearDamping(properties.linearDamping or 0)
     self.body:setAngularDamping(properties.angularDamping or 1.5)
     self:attachShape()
     self.body:setLinearVelocity((properties.vx or 0),(properties.vy or 0))
