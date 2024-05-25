@@ -73,6 +73,12 @@ function util.randomColor(theme)
         g = r
         if b<g then b = g+0.25 end
     end
+    if theme.gray then
+        local avg = (r + b + g)/3
+        r=avg
+        g=avg
+        b=avg
+    end
     return {r,g,b}
 end
 

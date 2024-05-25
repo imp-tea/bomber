@@ -52,10 +52,13 @@ function Obstacle:initialize(world, x, y, properties)
 
 	self.id = id or "Obstacle"..tostring(x)..tostring(y)..tostring(self.type)..tostring(math.random(1,1000))
     Obstacles[self.id] = self
+	Updateables[self.id] = self
+    Drawables[self.id] = self
 end
 
 function Obstacle:draw()
 	love.graphics.setColor(self.color)
+	love.graphics.setLineWidth(2)
 	if self.shape:getType() == "circle" then
         local x,y = self.body:getWorldPoints(self.shape:getPoint())
 		love.graphics.setColor(1,1,1,1)

@@ -9,8 +9,10 @@ function Entity:initialize(world, x, y, properties)
     self.gx,self.gy = self.world:getGravity()
     if properties == nil then properties = {} end
     self.x,self.y = x,y
+    self.vx = properties.vx or 0
+    self.vy = properties.vy or 0
     self.hasGravity = properties.hasGravity or true
-    self.friction = properties.friction or 0.2
+    self.friction = properties.friction or 0.3
     self.shape = properties.shape or "circle"
     self.radius = properties.radius or 5
     self.height = properties.height or 40
@@ -28,11 +30,13 @@ function Entity:initialize(world, x, y, properties)
     self.body:setLinearDamping(properties.linearDamping or 0)
     self.body:setAngularDamping(properties.angularDamping or 0)
     self:attachShape()
-    self.body:setLinearVelocity((properties.vx or 0),(properties.vy or 0))
+    self.body:setLinearVelocity(self.vx, self.vy)
     self.body:setUserData(self)
     self.mass = self.body:getMass()
     self.id = id or "Entity"..tostring(x)..tostring(y)..tostring(self.shape)..tostring(math.random(1,1000))
     Entities[self.id] = self
+    Updateables[self.id] = self
+    Drawables[self.id] = self
 end
 
 function Entity:attachShape()
@@ -92,6 +96,7 @@ end
 function Entity:draw()
     love.graphics.setColor(self.color)
     love.graphics.setColor(1,1,1,1)
+    love.graphics.setLineWidth(2)
     for k,fixture in pairs(self.fixtures) do
         local shape = fixture:getShape()
         if shape:getType() == "circle" then
@@ -118,9 +123,9 @@ function Entity:draw()
         love.graphics.setColor(0, 0, 0, 1)
         util.drawFace(hx,hy,self.width*self.headSize/2)
     end
-    local cmx,cmy = self.body:getWorldCenter()
-    love.graphics.setColor(1,1,1,1)
-    love.graphics.circle("fill",cmx,cmy,3)
+    --local cmx,cmy = self.body:getWorldCenter()
+    --love.graphics.setColor(1,1,1,1)
+    --love.graphics.circle("fill",cmx,cmy,3)
 end
 
 function Entity:isGrounded()

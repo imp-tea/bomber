@@ -6,27 +6,45 @@ Player = class('Player', Entity)
 function Player:initialize(world, x, y, properties)
     if properties == nil then properties = {} end
     Entity.initialize(self, world, x, y, properties)
-    self.jumpSpeed = properties.jumpSpeed or math.sqrt(2.5*self.height*self.gy)
+    self.jumpSpeed = properties.jumpSpeed or math.sqrt(3*self.height*self.gy)
     self.ungroundedMultiplier = properties.ungroundedMultiplier or 1
     self.canJump = false
+    self.maxSpeed = properties.maxSpeed or 750
+    self.grounded = false
     self.body:setUserData(self)
-    self.moveForce = properties.moveForce or self.body:getMass()*1000
+    self.moveForce = properties.moveForce or self.body:getMass()*2500
+    self.minimumCharge = 3
+    self.maximumCharge = 15
+    self.facing = 1
+    self.charging = false
+    self.charge = self.minimumCharge
 end
 
 function Player:jump(override)
-    if override == true or self:isGrounded() then
-        local vx,vy = self.body:getLinearVelocity()
-        self.body:setLinearVelocity(vx, self.jumpSpeed*-1)
+    if override == true or self.grounded then
+        self.body:setLinearVelocity(self.vx, self.jumpSpeed*-1)
     end
 end
 
 function Player:update(dt)
-    if love.keyboard.isDown("d") then
+    self.grounded = self:isGrounded()
+    self.vx, self.vy = self.body:getLinearVelocity()
+    if love.keyboard.isDown("d") and self.vx < self.maxSpeed then
         self:move('R')
-    elseif love.keyboard.isDown("a") then
+        self.facing = 1
+    elseif love.keyboard.isDown("a") and self.vx > self.maxSpeed*-1 then
         self:move('L')
+        self.facing = -1
+    elseif self.grounded then
+        self.body:setLinearVelocity(self.vx*0.975, self.vy)
     end
     if love.keyboard.isDown("w") then self:jump() end
+
+    if self.charging  and self.charge <= self.maximumCharge then
+        self.charge = self.charge + dt*5
+        if self.charge > self.maximumCharge then self.charge = self.maximumCharge end
+    end
+
     self.x,self.y = self.body:getPosition()
 end
 
@@ -52,11 +70,18 @@ function Player:move(direction)
         fx = self.moveForce*direction[1]
         fy = self.moveForce*direction[2]
     end
-    if self:isGrounded() == false then
+    if not self.grounded then
         fx = fx*self.ungroundedMultiplier
         fy = fy*self.ungroundedMultiplier
         self.body:applyForce(fx,fy,cmx,cmy)
     else
         self.body:applyForce(fx,fy,cmx,cmy)
     end
+end
+
+function Player:shoot()
+    local offsetX = (self.width + self.charge)*self.facing
+    local offsetY = -10
+    local velocityX = self.facing * 1500 + self.body:getLinearVelocity()
+    local bomb = Bomb(self.world, self.x + offsetX, self.y + offsetY, {radius = self.charge, vx = velocityX})
 end

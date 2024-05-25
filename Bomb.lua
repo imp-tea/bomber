@@ -1,7 +1,8 @@
 local class = require 'middleclass'
 Bomb = class('Bomb')
-
 Bombs = {}
+
+require 'Explosion'
 
 function Bomb:initialize(world, x, y, properties)
     self.world = world
@@ -20,15 +21,18 @@ function Bomb:initialize(world, x, y, properties)
     self.group = properties.group or 0
     self.body = love.physics.newBody(world, x, y, "dynamic")
     self.body:setFixedRotation(properties.fixedRotation or false)
-    self.body:setLinearDamping(properties.linearDamping or 0)
-    self.body:setAngularDamping(properties.angularDamping or 0)
+    self.body:setLinearDamping(properties.linearDamping or 0.05)
+    self.body:setAngularDamping(properties.angularDamping or 1.5)
     self:attachShape()
     self.body:setLinearVelocity((properties.vx or 0),(properties.vy or 0))
     self.body:setAngularVelocity(properties.angularVelocity or math.random(1,15))
     self.body:setUserData(self)
     self.mass = self.body:getMass()
+    self.isBomb = true
     self.id = id or "Bomb"..tostring(x)..tostring(y)..tostring(math.random(1,100000))
     Bombs[self.id] = self
+    Updateables[self.id] = self
+    Drawables[self.id] = self
 end
 
 function Bomb:attachShape()
@@ -79,6 +83,7 @@ function Bomb:update(dt)
     self.x,self.y = self.body:getPosition()
     self.life = self.life - dt
     if self.life <= 0 then
+        local explosion = Explosion(self.world, self.x, self.y, {radius = self.radius*self.radius*2+25})
         self:kill()
     end
 end
@@ -86,5 +91,7 @@ end
 function Bomb:kill()
     self.body:destroy()
     Bombs[self.id] = nil
+    Updateables[self.id] = nil
+    Drawables[self.id] = nil
     self = nil
 end

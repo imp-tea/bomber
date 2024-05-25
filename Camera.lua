@@ -3,24 +3,28 @@ Camera = class('Camera')
 
 function Camera:initialize(target, scale, rotation, targetType)
     self.target = target or {x=love.graphics.getWidth()/2, y=love.graphics.getHeight()/2}
-    self.scaleX = scale or 1
-    self.scaleY = self.scaleX
+    self.scale = scale or 1
+    self.targetScale = self.scale
     self.rotation = rotation or 0
     self.targetType = targetType or "coordinates"
-    self.x = self.target.x - ((love.graphics.getWidth()/2)*self.scaleX)
-    self.y = self.target.y - ((love.graphics.getHeight()/2)*self.scaleY)
+    self.x = self.target.x - ((love.graphics.getWidth()/2)*self.scale)
+    self.y = self.target.y - ((love.graphics.getHeight()/2)*self.scale)
 end
 
 function Camera:update()
-    local tarx = self.target.x - ((love.graphics.getWidth()/2)*self.scaleX)
-    local tary = self.target.y - ((love.graphics.getHeight()/2)*self.scaleY)
-    self:move((tarx-self.x)/10, (tary-self.y)/10)
+    self.scale = self.scale + (self.targetScale-self.scale)/20
+    -- Recalculate camera's position based on new scale
+    --self.x = self.target.x - ((love.graphics.getWidth()/2)*self.scale)
+    --self.y = self.target.y - ((love.graphics.getHeight()/2)*self.scale)
+    local tarx = self.target.x - ((love.graphics.getWidth()/2)*self.targetScale)
+    local tary = self.target.y - ((love.graphics.getHeight()/2)*self.targetScale)
+    self:move((tarx-self.x)/20, (tary-self.y)/20)
 end
 
 function Camera:set()
   love.graphics.push()
   love.graphics.rotate(-self.rotation)
-  love.graphics.scale(1 / self.scaleX, 1 / self.scaleY)
+  love.graphics.scale(1 / self.scale, 1 / self.scale)
   love.graphics.translate(-self.x, -self.y)
 end
 
@@ -36,4 +40,10 @@ end
 function Camera:setPosition(x, y)
   self.x = x or self.x
   self.y = y or self.y
+end
+
+function Camera:zoom(z)
+  local zoomFactor = 1.1
+  if z < 0 then zoomFactor = 0.9 end
+  self.targetScale = self.targetScale * zoomFactor
 end
