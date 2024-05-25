@@ -83,5 +83,5 @@ function Player:shoot()
     local offsetX = (self.width + self.charge)*self.facing
     local offsetY = -10
     local velocityX = self.facing * 1500 + self.body:getLinearVelocity()
-    local bomb = Bomb(self.world, self.x + offsetX, self.y + offsetY, {radius = self.charge, vx = velocityX})
+    local bomb = Bomb:new(self.world, self.x + offsetX, self.y + offsetY, {radius = self.charge, vx = velocityX})
 end
