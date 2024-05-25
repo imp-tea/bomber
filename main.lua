@@ -19,6 +19,7 @@ function love.load()
     WIDTH = HEIGHT
     World = love.physics.newWorld(0,1500,true)
     window = love.window.setMode(WIDTH,HEIGHT,{msaa = 2})
+    love.graphics.setDefaultFilter( "nearest","nearest")
     love.graphics.setBackgroundColor(util.randomColor({dark=true}))
     theme = {gray=true, bright=true}
     ground = Terrain:new(World,WIDTH/2,HEIGHT-50,{width = WIDTH, height = 100, color = util.randomColor(theme)})
@@ -28,7 +29,7 @@ function love.load()
     trampolineL = Terrain:new(World,80,HEIGHT-180,{restitution = 2, type = 'polygon', points = {-80,-80,-80,80,80,80}, color = util.randomColor(theme)})
     trampolineL = Terrain:new(World,WIDTH-80,HEIGHT-180,{restitution = 2, type = 'polygon', points = {80,-80,80,80,-80,80}, color = util.randomColor(theme)})
 
-    player = Player:new(World,WIDTH/2,HEIGHT/3,{group = 1, fixedRotation = true, ungroundedMultiplier = 0.2, height = 50, width = 25, color = util.randomColor(theme), shape='pill'})
+    player = Player:new(World,WIDTH/2,HEIGHT/3,{group = 1, fixedRotation = true, ungroundedMultiplier = 0.2, height = 64, width = 40, color = util.randomColor(theme), shape='pill'})
     cannon = Cannon:new(World, WIDTH/3, 400, {color = util.randomColor(theme), target = player})
 
     platform = Obstacle:new(World, WIDTH/2+100, HEIGHT-150, {
