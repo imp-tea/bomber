@@ -21,6 +21,8 @@ function Bomb:initialize(world, x, y, properties)
     self.group = properties.group or 0
     self.body = love.physics.newBody(world, x, y, "dynamic")
     self.stickTo = properties.stickTo or {}
+    self.isStuck = false
+    self.stuckTo = {self}
     self.explodeOn = properties.explodeOn or {}
     self.body:setFixedRotation(properties.fixedRotation or false)
     self.body:setLinearDamping(properties.linearDamping or 0)
@@ -91,18 +93,34 @@ function Bomb:update(dt)
                 local fixtureA, fixtureB = contact:getFixtures()
                 local other = fixtureA
                 if fixtureA:getUserData() == self then other = fixtureB end
-                if #self.stickTo > 0 then
-                    if self.stickTo[1]=="All" then
-                        local otherBody = other:getBody()
-                        local cx1, cy1, cx2, cy2 = contact:getPositions()
-                        local joint = love.physics.newWeldJoint(self.body, otherBody, cx1, cy1, false)
-                    else
-                        for j,object in pairs(self.stickTo) do
-                            if string.find(other:getUserData().id, object) then
-                                local otherBody = other:getBody()
-                                local cx1, cy1, cx2, cy2 = contact:getPositions()
-                                local joint = love.physics.newWeldJoint(self.body, otherBody, cx1, cy1, false)
+                local otherObject = other:getUserData()
+
+                if #self.stickTo > 0 and not self.isStuck then
+                    for j,object in pairs(self.stickTo) do
+                        if object=="All" or string.find(otherObject.id, object) then
+                            local otherBody = other:getBody()
+                            local cx1, cy1, cx2, cy2 = contact:getPositions()
+                            local joint = love.physics.newWeldJoint(self.body, otherBody, cx1, cy1, false)
+                            if otherObject.isBomb then
+                                table.insert(self.stuckTo, otherObject)
+                                table.insert(otherObject.stuckTo, self)
+                                if #otherObject.stuckTo > #self.stuckTo then
+                                    self.stuckTo = otherObject.stuckTo
+                                elseif #otherObject.stuckTo < #self.stuckTo then
+                                    otherObject.stuckTo = self.stuckTo
+                                end
+                                local life = 0
+                                for k,bomb in pairs(self.stuckTo) do
+                                    life = life + bomb.life
+                                end
+                                life = life / #self.stuckTo
+                                for k,bomb in pairs(self.stuckTo) do
+                                    bomb.life = life
+                                end
+                                otherObject.isStuck = true
                             end
+                            self.isStuck = true
+                            break
                         end
                     end
                 end
