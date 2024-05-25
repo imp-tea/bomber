@@ -17,7 +17,7 @@ function Cannon:initialize(world, x, y, properties)
     self.angle = properties.angle or 0
     self.target = properties.target or nil
     self.rotationSpeed = properties.rotationSpeed or math.pi/4
-    self.bombPeriod = properties.bombPeriod or 3
+    self.bombPeriod = properties.bombPeriod or 1
     self.bombTimer = properties.bombTimer or 0
     self.bombSize = properties.bombSize or 15
     self.bombSpeed = properties.bombSpeed or 1000
@@ -115,7 +115,7 @@ function Cannon:shoot()
     local offsetY = (self.barrelLength+self.bombSize) * dy
     local velocityX = self.bombSpeed * dx
     local velocityY = self.bombSpeed * dy
-    local bomb = Bomb:new(self.world, self.x + offsetX, self.y + offsetY, {radius = self.bombSize, vx = velocityX, vy = velocityY, stickTo = {"Bomb"}})
+    local bomb = Bomb:new(self.world, self.x + offsetX, self.y + offsetY, {radius = self.bombSize, vx = velocityX, vy = velocityY, stickTo = {"Bomb", "Player"}})
 end
 
 function Cannon:kill()
