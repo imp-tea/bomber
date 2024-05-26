@@ -7,6 +7,7 @@ require 'Explosion'
 function Bomb:initialize(world, x, y, properties)
     self.world = world
     self.gx,self.gy = self.world:getGravity()
+    if properties.gy then self.gy = properties.gy end
     if properties == nil then properties = {} end
     self.x,self.y = x,y
     self.friction = properties.friction or 0.5
