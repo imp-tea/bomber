@@ -76,10 +76,6 @@ function Cannon:draw()
             love.graphics.polygon("fill", self.body:getWorldPoints(shape:getPoints()))
         end
     end
-    local endPoints = {self.x+math.cos(self.angle)*1000, self.y+math.sin(self.angle)*1000}
-    love.graphics.line(self.x, self.y, endPoints[1], endPoints[2])
-    love.graphics.setColor(1,0,0)
-    love.graphics.print(self.angle, endPoints[1], endPoints[2]+50)
 end
 
 function Cannon:update(dt)
