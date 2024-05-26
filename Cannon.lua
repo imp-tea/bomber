@@ -115,7 +115,7 @@ function Cannon:shoot()
     local offsetY = (self.barrelLength+self.bombSize) * dy
     local velocityX = self.bombSpeed * dx
     local velocityY = self.bombSpeed * dy
-    local bomb = Bomb:new(self.world, self.x + offsetX, self.y + offsetY, {radius = self.bombSize, vx = velocityX, vy = velocityY, stickTo = {"Bomb", "Player"}})
+    local bomb = Bomb:new(self.world, self.x + offsetX, self.y + offsetY, {radius = self.bombSize, vx = velocityX, vy = velocityY, stickTo = {"Bomb"}, gy=750})
 end
 
 function Cannon:kill()
